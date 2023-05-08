@@ -101,7 +101,10 @@ Hooks.once("ready", function () {
   BossBar.renderBossBar();
 });
 
-Hooks.once("ready", function () {});
+Hooks.once("ready", function () {
+  // Fallback to ensure the setting is never accidentally left true by an untimely disconnect
+  if (game.user.isGM) game.settings.set("bossbar", "initialHack", false);
+});
 
 Hooks.on("updateScene", async (scene, updates) => {
   if (!game.user.isGM) {
