@@ -141,7 +141,7 @@ Hooks.on("getSceneControlButtons", (controls, b, c) => {
         if (toggle) {
           if (canvas.tokens.controlled[0]) {
             for (let token of canvas.tokens.controlled) {
-              await BossBar.create(token);
+              await BossBar.create(token, true, true);
               if (game.settings.get("bossbar", "cameraPan"))
                 BossBar.panCamera(token);
             }

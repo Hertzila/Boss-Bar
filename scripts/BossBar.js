@@ -2,6 +2,7 @@ class BossBar {
   constructor() {
     this.actor;
     this.token;
+    this.initialHack = false;
     this.bgPath = game.settings.get("bossbar", "backgroundPath");
     this.fgPath = game.settings.get("bossbar", "foregroundPath");
     this.tempBarColor = game.settings.get("bossbar", "tempBarColor");
@@ -9,10 +10,14 @@ class BossBar {
     this.position = game.settings.get("bossbar", "position");
   }
 
-  static async create(token, render = true) {
+  static async create(token, render = true, initialCreate = false) {
     let instance = new BossBar();
     instance.actor = token.actor;
     instance.token = token;
+    if (initialCreate) {
+      instance.initialHack = true;
+      this.initialAppearance(instance);
+    }
     let bgFlag = token.document.getFlag("bossbar", "bgTex");
     let fgFlag = token.document.getFlag("bossbar", "fgTex");
     if (bgFlag) instance.bgPath = bgFlag;
@@ -182,7 +187,15 @@ class BossBar {
     }
   }
 
+  static async initialAppearance(instance, milliseconds = 500) {
+    await new Promise(resolve => setTimeout(resolve, milliseconds));
+    instance.initialHack = false;
+    instance.update();
+    return false;
+  }
+
   get currentHp() {
+    if (this.initialHack === true) return 0;
     return Object.byString(
       this.actor.system,
       game.settings.get("bossbar", "currentHpPath")
