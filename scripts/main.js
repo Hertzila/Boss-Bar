@@ -77,6 +77,13 @@ Hooks.once("ready", function () {
     filePicker: true,
   });
 
+  game.settings.register("bossbar", "initialHack", {
+    scope: "world",
+    config: false,
+    type: Boolean,
+    default: false,
+  });
+
   new window.Ardittristan.ColorSetting("bossbar", "tempBarColor", {
     name: game.i18n.localize("bossbar.settings.tempBarColor.name"),
     hint: game.i18n.localize("bossbar.settings.tempBarColor.hint"),

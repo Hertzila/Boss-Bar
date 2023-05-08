@@ -2,7 +2,6 @@ class BossBar {
   constructor() {
     this.actor;
     this.token;
-    this.initialHack = false;
     this.bgPath = game.settings.get("bossbar", "backgroundPath");
     this.fgPath = game.settings.get("bossbar", "foregroundPath");
     this.tempBarColor = game.settings.get("bossbar", "tempBarColor");
@@ -14,8 +13,8 @@ class BossBar {
     let instance = new BossBar();
     instance.actor = token.actor;
     instance.token = token;
-    if (initialCreate) {
-      instance.initialHack = true;
+    if (game.user.isGM && initialCreate) {
+      await game.settings.set("bossbar", "initialHack", true);
       this.initialAppearance(instance);
     }
     let bgFlag = token.document.getFlag("bossbar", "bgTex");
@@ -40,6 +39,9 @@ class BossBar {
       ) {
         instance.update();
       }
+    });
+    this.hackHookId = Hooks.on("bossBarHackHook", () => {
+      instance.update();
     });
     return instance;
   }
@@ -145,7 +147,8 @@ class BossBar {
   }
 
   unHook() {
-    Hooks.off(this.hookId);
+    Hooks.off("updateActor", this.hookId);
+    Hooks.off("bossBarHackHook", this.hackHookId);
     this.clear();
   }
 
@@ -189,13 +192,17 @@ class BossBar {
 
   static async initialAppearance(instance, milliseconds = 500) {
     await new Promise(resolve => setTimeout(resolve, milliseconds));
-    instance.initialHack = false;
-    instance.update();
+    await game.settings.set("bossbar", "initialHack", false);
+    _BossBarSocket.executeForEveryone("hackUpdate");
     return false;
   }
 
+  static hackUpdate() {
+    Hooks.call("bossBarHackHook");
+  }
+
   get currentHp() {
-    if (this.initialHack === true) return 0;
+    if (game.settings.get("bossbar", "initialHack") === true) return 0;
     return Object.byString(
       this.actor.system,
       game.settings.get("bossbar", "currentHpPath")
